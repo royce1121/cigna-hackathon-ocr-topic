@@ -1,4 +1,6 @@
 from django.db import models
+from datetime import date
+
 
 class Patient(models.Model):
     ph_id = models.CharField(max_length=50, unique=True)
@@ -12,6 +14,21 @@ class Patient(models.Model):
         ('O', 'Other'),
     ]
     gender = models.CharField(max_length=1, choices=gender_choices)
+
+    def get_fullname(self):
+        full_name = '{}, {}'.format(self.last_name, self.first_name)
+        if self.middle_name:
+            full_name = '{} {}.'.format(full_name, self.middle_name[0])
+        return full_name
+
+    def get_age(self):
+        today = date.today()
+        age = None
+        if self.birth_date:
+            age = today.year - self.birth_date.year - (
+                (today.month, today.day) < (self.birth_date.month, self.birth_date.day)
+            )
+        return age
 
 
 class Facility(models.Model):
@@ -39,3 +56,9 @@ class MedicalTransactions(models.Model):
     professional_fee = models.CharField(max_length=50, blank=True, null=True)
     medicines = models.CharField(max_length=50, blank=True, null=True)
     laboratory = models.CharField(max_length=50, blank=True, null=True)
+
+    def get_total_fee(self):
+        int_prof_fee = int(self.professional_fee)
+        int_medicines = int(self.medicines)
+        int_laboratory = int(self.laboratory)
+        return int_prof_fee + int_medicines + int_laboratory

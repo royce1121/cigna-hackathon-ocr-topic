@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>PhilHealth ID Lookup</title>
+    <title>Patient ID Lookup</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,7 +20,7 @@
         }
         button {
             margin-top: 15px;
-            padding: 10px 20px;
+            padding: 10px;
             width: 100%;
             background-color: #1976d2;
             color: white;
@@ -40,23 +40,29 @@
 <body>
 
 <div class="container">
-    <h2>PhilHealth Member Lookup</h2>
+    <h2>Patient Lookup</h2>
 
-    <form method="POST">
-        {% csrf_token %}
+    <form method="GET">
         <label>Enter PhilHealth ID:</label>
         <input type="text" name="philhealth_id" placeholder="e.g. 12-345678901-2" required>
         <button type="submit">Search</button>
     </form>
 
-    {% if user_info %}
-    <div class="result-box">
-        <h3>Member Information</h3>
-        <p><strong>PhilHealth ID:</strong> {{ user_info.philhealth_id }}</p>
-        <p><strong>Name:</strong> {{ user_info.name }}</p>
-        <p><strong>Status:</strong> {{ user_info.status }}</p>
-        <p><strong>Birthdate:</strong> {{ user_info.birthdate }}</p>
-    </div>
+    {% if ph_id %}
+        {% if patient %}
+        <div class="result-box">
+            <h3>Member Information</h3>
+            <p><strong>PhilHealth ID:</strong> {{ patient.ph_id }}</p>
+            <p><strong>Name:</strong> {{ patient.get_fullname }}</p>
+            <p><strong>Birthdate:</strong> {{ patient.birth_date }}</p>
+            <p><strong>Age:</strong> {{ patient.get_age }}</p>
+        </div>
+        {% else %}
+        <div class="result-box">
+            <h3>No Member Information Found with this ID:</h3>
+            <p><strong>{{ph_id}}</strong></p>
+        </div>
+        {% endif %}
     {% endif %}
 </div>
 
