@@ -7,3 +7,5 @@ opencv-python
 Pillow
 pandas
 openpyxl
+paddlepaddle
+paddleocr

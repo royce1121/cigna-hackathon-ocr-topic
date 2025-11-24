@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>OCR Upload</title>
+</head>
+<body>
+    <h1>Upload PDF/Image for OCR</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="file" required>
+        <button type="submit">Extract Text</button>
+    </form>
+
+    {% if text_result %}
+        <h2>Extracted Text:</h2>
+        <pre>
+        {% for line in text_result %}
+            {{ line }}
+        {% endfor %}
+        </pre>
+    {% endif %}
+</body>
+</html>
