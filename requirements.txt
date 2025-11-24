@@ -1,0 +1,9 @@
+Django
+djangorestframework
+PyMuPDF
+fillpdf
+numpy
+opencv-python
+Pillow
+pandas
+openpyxl

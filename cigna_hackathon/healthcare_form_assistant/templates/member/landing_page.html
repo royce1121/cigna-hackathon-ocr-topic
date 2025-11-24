@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PhilHealth ID Lookup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        .container {
+            max-width: 400px;
+            margin: auto;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            width: 100%;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .result-box {
+            margin-top: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            background: #f8f8f8;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>PhilHealth Member Lookup</h2>
+
+    <form method="POST">
+        {% csrf_token %}
+        <label>Enter PhilHealth ID:</label>
+        <input type="text" name="philhealth_id" placeholder="e.g. 12-345678901-2" required>
+        <button type="submit">Search</button>
+    </form>
+
+    {% if user_info %}
+    <div class="result-box">
+        <h3>Member Information</h3>
+        <p><strong>PhilHealth ID:</strong> {{ user_info.philhealth_id }}</p>
+        <p><strong>Name:</strong> {{ user_info.name }}</p>
+        <p><strong>Status:</strong> {{ user_info.status }}</p>
+        <p><strong>Birthdate:</strong> {{ user_info.birthdate }}</p>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>
