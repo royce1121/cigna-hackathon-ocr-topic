@@ -89,3 +89,13 @@ http://127.0.0.1:8000/healthcare_ai/member/
 ```
 
 ---
+## 9. OCR/PDF Controller
+
+under healthcare_form_assistant/controller.py
+There is a class called PDFController.
+This class accept pdf file as input and calling the function get_pdf_text will return
+a list of text that is get from the PDF
+
+```
+http://127.0.0.1:8000/healthcare_ai/member/
+```

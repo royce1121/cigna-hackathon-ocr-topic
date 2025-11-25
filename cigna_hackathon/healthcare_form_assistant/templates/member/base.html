@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Cigna Team{% endblock %}</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        header {
+            background-color: #1E3A8A;
+            color: white;
+            padding: 30px 40px;
+            display: flex;
+            align-items: center;
+        }
+
+        header nav a {
+            color: white;
+            text-decoration: none;
+            margin-right: 20px;
+            font-weight: bold;
+        }
+
+        header nav a:hover {
+            text-decoration: underline;
+        }
+
+        main {
+            height: calc(100vh - 50px);
+            display: flex;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 50px);
+        }
+
+        .left-panel {
+            background-color: #E0E7FF;
+            border-right: 1px solid #ccc;
+            width: 20%;
+            padding: 20px;
+            border-right: 1px solid #ccc;
+            overflow-y: auto;
+        }
+
+        .left-panel h2 {
+            margin-top: 0;
+        }
+
+        .search-box {
+            display: flex;
+        }
+
+        .search-box input[type="text"] {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+            width: 65%;
+        }
+
+        .search-box button {
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            width: 35%;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+
+        .search-box button:hover {
+            background-color: #0056b3;
+        }
+
+        .right-panel {
+            background-color: #ffffff;
+            width: 80%;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .right-panel h2 {
+            margin-top: 0;
+            color: #333;
+        }
+
+        .right-panel p {
+            font-size: 16px;
+            line-height: 1.5;
+            color: #555;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #333;
+            padding: 8px;
+        }
+        th {
+            background-color: #eee;
+        }
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .left-panel, .right-panel {
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .action-buttons button {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+        }
+
+        .cf1_generator {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            cursor: pointer;
+            background-color: #007BFF;
+        }
+        .action-buttons button:nth-child(1) { background-color: #28a745; } /* CF2 */
+        .action-buttons button:nth-child(2) { background-color: #ffc107; color: black;} /* CF3 */
+
+        .action-buttons button:hover {
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="{% url 'member-view' %}">Home</a>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        <!-- Child templates will inject content here -->
+        {% endblock %}
+    </main>
+</body>
+</html>

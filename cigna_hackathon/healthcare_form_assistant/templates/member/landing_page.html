@@ -1,70 +1,89 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Patient ID Lookup</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-        }
-        .container {
-            max-width: 400px;
-            margin: auto;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        button {
-            margin-top: 15px;
-            padding: 10px;
-            width: 100%;
-            background-color: #1976d2;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .result-box {
-            margin-top: 30px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            background: #f8f8f8;
-            border-radius: 5px;
-        }
-    </style>
-</head>
-<body>
+{% extends "member/base.html" %}
 
-<div class="container">
-    <h2>Patient Lookup</h2>
+{% block title %}Dashboard{% endblock %}
 
-    <form method="GET">
-        <label>Enter PhilHealth ID:</label>
-        <input type="text" name="philhealth_id" placeholder="e.g. 12-345678901-2" required>
-        <button type="submit">Search</button>
-    </form>
-
-    {% if ph_id %}
-        {% if patient %}
-        <div class="result-box">
-            <h3>Member Information</h3>
-            <p><strong>PhilHealth ID:</strong> {{ patient.ph_id }}</p>
-            <p><strong>Name:</strong> {{ patient.get_fullname }}</p>
-            <p><strong>Birthdate:</strong> {{ patient.birth_date }}</p>
-            <p><strong>Age:</strong> {{ patient.get_age }}</p>
+{% block content %}
+    <div class="container">
+        <!-- Left Panel: PhilHealth Search -->
+        <div class="left-panel">
+            {% if patient %}
+            <form method="post" action="{% url 'generate-pdf' %}">
+            {% csrf_token %}
+                <div class="result-box">
+                    <h3>Member Information</h3>
+                    <p><strong>PhilHealth ID:</strong> {{ patient.ph_id }}</p>
+                    <p><strong>Name:</strong> {{ patient.get_fullname }}</p>
+                    <p><strong>Birthdate:</strong> {{ patient.birth_date }}</p>
+                    <p><strong>Age:</strong> {{ patient.get_age }}</p>
+                    <button class="cf1_generator">CF1</button>
+                </div>
+            </form>
+            {% else %}
+            <h2>Search Member Entry</h2>
+            <form method="GET">
+                <div class="search-box">
+                    <input type="text" name="philhealth_id" placeholder="Enter Member ID" required>
+                    <button type="submit">Search</button>
+                </div>
+                <p style="margin-top:20px; color:#777;">
+                    Enter a PhilHealth ID to search for a member's record. This will fetch details from the database or connected EMR/HIS system.
+                </p>
+            </form>
+            {% endif %}
         </div>
-        {% else %}
-        <div class="result-box">
-            <h3>No Member Information Found with this ID:</h3>
-            <p><strong>{{ph_id}}</strong></p>
-        </div>
-        {% endif %}
-    {% endif %}
-</div>
 
-</body>
-</html>
+        <div class="right-panel">
+            {% if transactions %}
+            <h1>All Medical Transactions</h1>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Application Date</th>
+
+                        <th>Facility Name</th>
+                        <th>Attending Physician</th>
+                        <th>License No.</th>
+
+                        <th>Statement Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>{{ transaction.date }}</td>
+
+                        <td>{{ transaction.provider.facility.name }}</td>
+                        <td>{{ transaction.provider.first_name }}</td>
+                        <td>{{ transaction.provider.license_no }}</td>
+
+                        <td>{{ transaction.statement_date }}</td>
+                        <td>
+                            <div class="action-buttons">
+                                <button>CF2</button>
+                                <button>CF3</button>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="9">No transactions found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <h2>Form AI Assistant</h2>
+            <p>
+                Welcome to the <strong>Form AI Assistant</strong>! This tool is designed to automatically assist healthcare staff in generating PhilHealth claim forms — including <strong>CF1, CF2, and CF3</strong> — by extracting information directly from the patient's EMR and HIS records.
+            </p>
+            <p>
+                The assistant analyzes the patient’s medical records, vital signs, diagnoses, procedures, and admission details to pre-fill the forms accurately, reducing manual entry and minimizing errors. 
+            </p>
+            <p>
+                Users simply need to search for a PhilHealth ID or member record, and the AI assistant will guide them through each form, providing contextual suggestions, validations, and notifications for missing or inconsistent data.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

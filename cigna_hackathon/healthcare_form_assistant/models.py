@@ -56,6 +56,8 @@ class MedicalTransactions(models.Model):
     professional_fee = models.CharField(max_length=50, blank=True, null=True)
     medicines = models.CharField(max_length=50, blank=True, null=True)
     laboratory = models.CharField(max_length=50, blank=True, null=True)
+    emr_file = models.FileField(upload_to='medical_records/', blank=True, null=True)
+    his_file = models.FileField(upload_to='medical_records/', blank=True, null=True)
 
     def get_total_fee(self):
         int_prof_fee = int(self.professional_fee)
