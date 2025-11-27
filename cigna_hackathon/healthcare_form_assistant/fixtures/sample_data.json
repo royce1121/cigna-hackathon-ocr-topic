@@ -17,12 +17,42 @@
     "model": "healthcare_form_assistant.patient",
     "pk": 1,
     "fields": {
-      "ph_id": "12345678",
+      "ph_id": "123456789012",
       "first_name": "Juan",
       "last_name": "Dela Cruz",
       "middle_name": "Santos",
-      "birth_date": "1990-01-01",
-      "gender": "M"
+      "birth_date": "1980-01-01",
+      "gender": "M",
+      "unit_room_no_floor": "123 St. Sampaloc",
+      "street": "123 St.",
+      "barangay": "Sampaloc",
+      "city_municipality": "Manila",
+      "province": "Metro Manila",
+      "country": "Philippines",
+      "zip_code": "100008",
+      "mobile_no": "09951234567",
+      "email_address": "Juan.delacruz@sample.com"
+    }
+  },
+  {
+    "model": "healthcare_form_assistant.patient",
+    "pk": 2,
+    "fields": {
+      "ph_id": "229876543210",
+      "first_name": "John",
+      "last_name": "Doe",
+      "middle_name": "Santos",
+      "birth_date": "1995-01-01",
+      "gender": "M",
+      "unit_room_no_floor": "",
+      "street": "1620 St.",
+      "barangay": "",
+      "city_municipality": "Los Banos",
+      "province": "Laguna",
+      "country": "Philippines",
+      "zip_code": "100008",
+      "mobile_no": "09957654321",
+      "email_address": "John.doe@sample.com"
     }
   },
   {
@@ -51,42 +81,22 @@
     "model": "healthcare_form_assistant.medicaltransactions",
     "pk": 1,
     "fields": {
-      "date": "2023-01-31",
+      "date": "2025-11-20",
       "patient": 1,
       "provider": 1,
-      "statement_date": "2023-02-26",
-      "room_type": "pri",
-      "professional_fee": "5000",
-      "medicines": "2000",
-      "laboratory": "1500"
+      "statement_date": "2025-11-28",
+      "room_type": "pri"
     }
   },
   {
     "model": "healthcare_form_assistant.medicaltransactions",
     "pk": 2,
     "fields": {
-      "date": "2023-04-01",
-      "patient": 1,
+      "date": "2025-10-05",
+      "patient": 2,
       "provider": 1,
-      "statement_date": "2023-04-20",
-      "room_type": "pri",
-      "professional_fee": "2000",
-      "medicines": "800",
-      "laboratory": "500"
-    }
-  },
-  {
-    "model": "healthcare_form_assistant.medicaltransactions",
-    "pk": 3,
-    "fields": {
-      "date": "2023-09-16",
-      "patient": 1,
-      "provider": 1,
-      "statement_date": "2023-09-25",
-      "room_type": "pri",
-      "professional_fee": "2000",
-      "medicines": "800",
-      "laboratory": "500"
+      "statement_date": "2025-10-10",
+      "room_type": "pri"
     }
   }
 ]

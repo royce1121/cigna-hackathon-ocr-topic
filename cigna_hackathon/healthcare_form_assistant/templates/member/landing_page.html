@@ -6,7 +6,7 @@
     <div class="container">
         <!-- Left Panel: PhilHealth Search -->
         <div class="left-panel">
-            {% if patient %}
+            {% if patient and ph_id %}
             <form method="post" action="{% url 'generate-pdf' %}">
             {% csrf_token %}
                 <div class="result-box">
@@ -15,19 +15,26 @@
                     <p><strong>Name:</strong> {{ patient.get_fullname }}</p>
                     <p><strong>Birthdate:</strong> {{ patient.birth_date }}</p>
                     <p><strong>Age:</strong> {{ patient.get_age }}</p>
-                    <button class="cf1_generator">CF1</button>
+                    <button class="cf1_generator">Generate CF1</button>
                 </div>
             </form>
             {% else %}
             <h2>Search Member Entry</h2>
             <form method="GET">
                 <div class="search-box">
-                    <input type="text" name="philhealth_id" placeholder="Enter Member ID" required>
+                    <input type="text" name="philhealth_id" placeholder="{{ ph_id|default:'Enter Member ID' }}" required>
                     <button type="submit">Search</button>
                 </div>
+                {% if ph_id %}
+                <p style="margin-top:20px; color:#777;">
+                    No Member Found with this ID
+                    Please search using different ID
+                </p>
+                {% else %}
                 <p style="margin-top:20px; color:#777;">
                     Enter a PhilHealth ID to search for a member's record. This will fetch details from the database or connected EMR/HIS system.
                 </p>
+                {% endif %}
             </form>
             {% endif %}
         </div>
@@ -59,10 +66,18 @@
 
                         <td>{{ transaction.statement_date }}</td>
                         <td>
+                            {% if transaction.emr_file %}
                             <div class="action-buttons">
-                                <button>CF2</button>
-                                <button>CF3</button>
+                                <button class="btn btn-primary btn-preview-pdf" 
+                                    data-pdf-url='{{ transaction.emr_file.url }}'>
+                                    View EMR
+                                </button>
+                                <button class="btn-ocr-text"
+                                    patient-transaction-id='{{transaction.id}}'>
+                                    Generate Forms
+                                </button>
                             </div>
+                            {% endif %}
                         </td>
                     </tr>
                     {% empty %}
@@ -86,4 +101,213 @@
             {% endif %}
         </div>
     </div>
+
+    <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pdfModalLabel">EMR Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <iframe id="pdfFrame" src="" width="100%" height="600px" style="border:none;"></iframe>
+            </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal 2: OCR Text -->
+
+    <div class="modal" id="ocrModal">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <input type="text" name="medical_transaction_id" id="medical_transaction_id" hidden>
+                <div id="ocrModalBody">
+                    <div id="ocrInfo" style="display:none; margin-bottom: 1rem; background-color:#f9f9f9; padding:0.8rem; border-left:4px solid #3498db;">
+                        The text below has been extracted from the selected PDF. Please manually feed this data into your agentic model to map the JSON data required for CF2 and CF3.
+                    </div>
+                    <div id="ocrLoading" style="display:none; text-align:center; margin:1rem;">
+                        <div class="spinner"></div>
+                        <p>Loading OCR results...</p>
+                    </div>
+                    <pre id="ocrText" style="white-space: pre-wrap;"></pre>
+                    <!-- Next Step Button -->
+                    <div style="margin-top:1rem; text-align:right;">
+                        <button id="nextStepBtn" class="cf1_generator" style="display:none;">
+                            Next Step →
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer"></div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const pdfModal = new bootstrap.Modal(document.getElementById('pdfModal'));
+    const pdfFrame = document.getElementById('pdfFrame');
+    const ocrModal = document.getElementById('ocrModal');
+    const ocrText = document.getElementById('ocrText');
+    const ocrLoading = document.getElementById('ocrLoading');
+    const nextStepBtn = document.getElementById('nextStepBtn');
+    const ocrModalBody = document.getElementById('ocrModalBody');
+    const transactionId = document.getElementById('medical_transaction_id');
+    const ocrEndpoint = "{% url 'ocr' %}";
+    const generateBillingURL = "{% url 'generate_billing' %}"
+    // Add click event to all buttons
+    document.querySelectorAll('.btn-preview-pdf').forEach(button => {
+        button.addEventListener('click', () => {
+            let pdfUrl = button.getAttribute('data-pdf-url');
+            pdfFrame.src = pdfUrl;
+            pdfModal.show();
+        });
+    });
+
+    document.querySelectorAll('.btn-ocr-text').forEach(button => {
+        button.addEventListener('click', async () => {
+            const patientId = button.getAttribute('patient-transaction-id');
+            const formData = new FormData();
+            formData.append("patient_id", patientId);
+            transactionId.value = patientId;
+            ocrModal.classList.add('show');
+            ocrText.textContent = '';
+            ocrLoading.style.display = 'block';
+            try {
+                const response = await fetch(ocrEndpoint, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+
+                const data = await response.json();
+
+                // Join all lines into a single string with line breaks
+                ocrText.textContent = data.text_result.join('\n');
+
+                // Show modal
+                ocrInfo.style.display = 'block';
+                ocrModal.classList.add('show');
+                nextStepBtn.style.display = 'inline-block';
+            } catch (err) {
+                console.error('Error fetching OCR text:', err);
+            } finally {
+                // Hide spinner when done
+                ocrLoading.style.display = 'none';
+            }
+        });
+    });
+    nextStepBtn.addEventListener('click', () => {
+        // Replace modal content dynamically
+        ocrModalBody.innerHTML = `
+            <div id="inputArea" style="padding: 1rem;">
+                <div style="margin-bottom:1rem; font-weight:bold;">
+                    Paste the JSON output from your agentic model here:
+                </div>
+                <textarea id="agenticJsonInput"
+                    style="
+                    width: 100%;
+                    height: 300px;
+                    padding: 1rem;
+                    border-radius: 0.3rem;
+                    box-sizing: border-box;   /* ensures padding doesn't shrink width */
+                "></textarea>
+                <div style="margin-top:1rem; text-align:right;">
+                    <button id="submitJsonBtn" class="cf1_generator">Generate Forms</button>
+                </div>
+            </div>
+            <div id="cf3PreviewContainer" style="margin-top:1rem; display:none;">
+                <div style="font-weight:bold; margin-bottom:0.5rem;">Forms Preview:</div>
+                <iframe id="cf3Preview" style="width:100%; height:400px;" frameborder="0"></iframe>
+                <div style="margin-top:1rem; text-align:right;">
+                    <button class="cf1_generator" id="generateBilling">Proceed Billing</button>
+                </div>
+            </div>
+        `;
+        const submitBtn = document.getElementById('submitJsonBtn');
+        const inputArea = document.getElementById('inputArea')
+        const generateCF3Url = "{% url 'generate_cf3' %}";
+        submitBtn.addEventListener('click', () => {
+            const billingBtn = document.getElementById('generateBilling');
+            const jsonData = document.getElementById('agenticJsonInput').value;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            let parsedData;
+            try {
+                parsedData = JSON.parse(jsonData);
+
+                fetch(generateCF3Url, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        transaction_id: transactionId.value,
+                        json_data: parsedData,
+                    })
+                })
+                .then(response => response.blob()) // get PDF as blob
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const previewContainer = document.getElementById('cf3PreviewContainer');
+                    const previewIframe = document.getElementById('cf3Preview');
+                    inputArea.style.display = 'none'
+                    previewIframe.src = url;
+                    previewContainer.style.display = 'block';
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Error generating CF3 forms');
+                });
+
+            } catch (e) {
+                alert('Invalid JSON. Please check your input.');
+            }
+            billingBtn.addEventListener('click', async () => {
+                fetch(generateBillingURL, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: JSON.stringify({
+                        transaction_id: transactionId.value,
+                        json_data: parsedData,
+                    })
+                })
+                .then(res => res.blob())
+                .then(blob => {
+                    const url = URL.createObjectURL(blob);
+                    // Show PDF in iframe
+                    ocrModalBody.innerHTML = `
+                        <div style="margin-bottom:1rem; font-weight:bold;">
+                            Generated Hospital Billing (Preview)
+                        </div>
+
+                        <iframe src="${url}" style="width:100%; height:80vh; border:none;"></iframe>
+
+                        <button id="downloadBillingPdfBtn"
+                                class="btn btn-primary mt-3">
+                            Download Billing PDF
+                        </button>
+                    `;
+
+                    // Attach download button action
+                    document.getElementById("downloadBillingPdfBtn").addEventListener("click", () => {
+                        const a = document.createElement("a");
+                        a.href = pdfUrl;
+                        a.download = "hospital_billing.pdf";
+                        a.click();
+                    });
+                });
+            });
+        });
+    });
+    
+</script>
 {% endblock %}

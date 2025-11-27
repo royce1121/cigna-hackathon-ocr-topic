@@ -14,6 +14,19 @@ class Patient(models.Model):
         ('O', 'Other'),
     ]
     gender = models.CharField(max_length=1, choices=gender_choices)
+    unit_room_no_floor = models.CharField("Unit/Room No./Floor", max_length=255, blank=True, null=True)
+    building_name = models.CharField("Building Name", max_length=255, blank=True, null=True)
+    lot_blk_house_bldg_no = models.CharField("Lot/Blk/House/Bldg.No", max_length=255, blank=True, null=True)
+    street = models.CharField("Street", max_length=255, blank=True, null=True)
+    subdivision_village = models.CharField("Subdivision/Village", max_length=255, blank=True, null=True)
+    barangay = models.CharField("Barangay", max_length=255, blank=True, null=True)
+    city_municipality = models.CharField("City/Municipality", max_length=255, blank=True, null=True)
+    province = models.CharField("Province", max_length=255, blank=True, null=True)
+    country = models.CharField("Country", max_length=255, blank=True, null=True)
+    zip_code = models.CharField("Zip Code", max_length=20, blank=True, null=True)
+    landline_no = models.CharField("Landline No. (Area Code + Tel. No.)", max_length=50, blank=True, null=True)
+    mobile_no = models.CharField("Mobile No.", max_length=50, blank=True, null=True)
+    email_address = models.EmailField("Email Address", blank=True, null=True)
 
     def get_fullname(self):
         full_name = '{}, {}'.format(self.last_name, self.first_name)
