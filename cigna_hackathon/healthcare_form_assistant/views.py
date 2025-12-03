@@ -393,6 +393,11 @@ class GenerateHospitalBillView(View):
 
         return HttpResponse(buffer.getvalue(), content_type='application/pdf')
 
+@method_decorator(csrf_exempt, name='dispatch')
+class GenerateFinalBillView(View):
+    def post(self, request, *args, **kwargs):
+        return JsonResponse({"success": True, "message": "Billing PDF saved successfully."})
+
 
 class DesignedBlankHospitalBillView(View):
     def get(self, request, *args, **kwargs):

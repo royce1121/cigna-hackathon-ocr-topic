@@ -1,6 +1,7 @@
 from django.urls import path
 from .views import (MemberView, OCRView, SampleEMRPDF, SampleEMRPDF2,
-GeneratePDFView, GenerateFormsPDFView, DesignedBlankHospitalBillView, GenerateHospitalBillView
+    GeneratePDFView, GenerateFormsPDFView, DesignedBlankHospitalBillView,
+    GenerateHospitalBillView, GenerateFinalBillView
 )
 urlpatterns = [
     path('member/', MemberView.as_view(), name='member-view'),
@@ -12,4 +13,5 @@ urlpatterns = [
     path('emr_2/', SampleEMRPDF2.as_view(), name='emr_2'),
     path('billing_provider/', DesignedBlankHospitalBillView.as_view(), name='billing'),
     path('generate_billing/', GenerateHospitalBillView.as_view(), name='generate_billing'),
+    path('final_billing/', GenerateFinalBillView.as_view(), name='final_billing'),
 ]
